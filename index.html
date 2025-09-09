@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Management Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            background: white;
+            color: #e74c3c;
+            border-bottom-color: #e74c3c;
+        }
+
+        .tab:hover {
+            background: #fff;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            flex: 1;
+            margin-bottom: 25px;
+        }
+
+        .form-group.full-width {
+            flex: 1 1 100%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #e74c3c;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+            transform: translateY(-2px);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 18px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #bdc3c7;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #e74c3c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .property-list {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .property-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .property-item h4 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .property-details {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .refresh-btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ Property Management Admin</h1>
+            <p>Add new properties and manage your listings</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('add-property')">
+                📝 Add New Property
+            </div>
+            <div class="tab" onclick="switchTab('view-properties')">
+                📋 View Properties
+            </div>
+        </div>
+
+        <!-- Add Property Tab -->
+        <div id="add-property" class="tab-content active">
+            <div class="message success" id="addSuccessMessage">
+                <strong>Success!</strong> Property has been added successfully.
+            </div>
+            <div class="message error" id="addErrorMessage">
+                <strong>Error:</strong> Something went wrong. Please try again.
+            </div>
+            <div class="loading" id="addLoading">
+                <div class="spinner"></div>
+                <p>Adding property...</p>
+            </div>
+
+            <form id="addPropertyForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="streetNumber">Street Number *</label>
+                        <input type="text" id="streetNumber" name="streetNumber" required placeholder="123">
+                    </div>
+                    <div class="form-group">
+                        <label for="streetName">Street Name *</label>
+                        <input type="text" id="streetName" name="streetName" required placeholder="Collins Street">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="suburb">Suburb *</label>
+                        <input type="text" id="suburb" name="suburb" required placeholder="Melbourne">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State *</label>
+                        <select id="state" name="state" required>
+                            <option value="">Select State</option>
+                            <option value="NSW">NSW</option>
+                            <option value="VIC">VIC</option>
+                            <option value="QLD">QLD</option>
+                            <option value="WA">WA</option>
+                            <option value="SA">SA</option>
+                            <option value="TAS">TAS</option>
+                            <option value="NT">NT</option>
+                            <option value="ACT">ACT</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="postcode">Postcode *</label>
+                        <input type="text" id="postcode" name="postcode" required placeholder="3000">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="propertyType">Property Type *</label>
+                        <select id="propertyType" name="propertyType" required>
+                            <option value="">Select Type</option>
+                            <option value="House">House</option>
+                            <option value="Townhouse">Townhouse</option>
+                            <option value="Apartment">Apartment</option>
+                            <option value="Unit">Unit</option>
+                            <option value="Studio">Studio</option>
+                            <option value="Villa">Villa</option>
+                            <option value="Duplex">Duplex</option>
+                            <option value="Land">Land</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bedrooms">Bedrooms</label>
+                        <select id="bedrooms" name="bedrooms">
+                            <option value="">Select</option>
+                            <option value="Studio">Studio</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5+</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bathrooms">Bathrooms</label>
+                        <select id="bathrooms" name="bathrooms">
+                            <option value="">Select</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4+</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="priceMin">Price Min ($)</label>
+                        <input type="number" id="priceMin" name="priceMin" placeholder="800000">
+                    </div>
+                    <div class="form-group">
+                        <label for="priceMax">Price Max ($)</label>
+                        <input type="number" id="priceMax" name="priceMax" placeholder="900000">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="openHomeTimes">Open Home Times *</label>
+                    <textarea id="openHomeTimes" name="openHomeTimes" required 
+                        placeholder="e.g. Saturday 1:00 PM - 1:30 PM, Sunday 12:00 PM - 12:30 PM"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Features</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="parking" name="features" value="Parking">
+                            <label for="parking">Parking</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="garden" name="features" value="Garden">
+                            <label for="garden">Garden</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="pool" name="features" value="Pool">
+                            <label for="pool">Pool</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="aircon" name="features" value="Air Conditioning">
+                            <label for="aircon">Air Conditioning</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="balcony" name="features" value="Balcony">
+                            <label for="balcony">Balcony</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="garage" name="features" value="Garage">
+                            <label for="garage">Garage</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Additional Notes</label>
+                    <textarea id="description" name="description" 
+                        placeholder="Any additional details about the property..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">Add Property</button>
+            </form>
+        </div>
+
+        <!-- View Properties Tab -->
+        <div id="view-properties" class="tab-content">
+            <button class="refresh-btn" onclick="loadProperties()">🔄 Refresh Properties</button>
+            
+            <div class="message success" id="viewSuccessMessage">
+                Properties loaded successfully.
+            </div>
+            <div class="message error" id="viewErrorMessage">
+                <strong>Error:</strong> Could not load properties.
+            </div>
+            <div class="loading" id="viewLoading">
+                <div class="spinner"></div>
+                <p>Loading properties...</p>
+            </div>
+
+            <div class="property-list" id="propertyList">
+                <p>Click "Refresh Properties" to load your current listings.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION - UPDATE THESE VALUES
+        const CONFIG = {
+            // Your Google Apps Script URL for property management
+            PROPERTY_SCRIPT_URL: 'YOUR_PROPERTY_SCRIPT_URL_HERE'
+        };
+
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Add property form submission
+        document.getElementById('addPropertyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.querySelector('#addPropertyForm .submit-btn');
+            const loading = document.getElementById('addLoading');
+            const successMessage = document.getElementById('addSuccessMessage');
+            const errorMessage = document.getElementById('addErrorMessage');
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            // Collect form data
+            const formData = new FormData(this);
+            const features = Array.from(document.querySelectorAll('input[name="features"]:checked'))
+                .map(cb => cb.value);
+
+            // Build full address
+            const fullAddress = `${formData.get('streetNumber')} ${formData.get('streetName')}, ${formData.get('suburb')} ${formData.get('state')} ${formData.get('postcode')}`;
+            
+            // Build property type description
+            let propertyDescription = formData.get('propertyType');
+            if (formData.get('bedrooms')) {
+                propertyDescription = `${formData.get('bedrooms')} Bedroom ${propertyDescription}`;
+            }
+
+            // Build price range
+            let priceRange = '';
+            if (formData.get('priceMin') || formData.get('priceMax')) {
+                const minPrice = formData.get('priceMin') ? `$${parseInt(formData.get('priceMin')).toLocaleString()}` : '';
+                const maxPrice = formData.get('priceMax') ? `$${parseInt(formData.get('priceMax')).toLocaleString()}` : '';
+                
+                if (minPrice && maxPrice) {
+                    priceRange = `${minPrice} - ${maxPrice}`;
+                } else if (minPrice) {
+                    priceRange = `From ${minPrice}`;
+                } else if (maxPrice) {
+                    priceRange = `Up to ${maxPrice}`;
+                }
+            }
+
+            const propertyData = {
+                action: 'addProperty',
+                fullAddress: fullAddress,
+                streetNumber: formData.get('streetNumber'),
+                streetName: formData.get('streetName'),
+                suburb: formData.get('suburb'),
+                state: formData.get('state'),
+                postcode: formData.get('postcode'),
+                propertyType: formData.get('propertyType'),
+                propertyDescription: propertyDescription,
+                bedrooms: formData.get('bedrooms') || '',
+                bathrooms: formData.get('bathrooms') || '',
+                priceRange: priceRange,
+                priceMin: formData.get('priceMin') || '',
+                priceMax: formData.get('priceMax') || '',
+                openHomeTimes: formData.get('openHomeTimes'),
+                features: features.join(', '),
+                description: formData.get('description') || '',
+                dateAdded: new Date().toLocaleString('en-AU', {
+                    timeZone: 'Australia/Sydney'
+                })
+            };
+
+            try {
+                if (CONFIG.PROPERTY_SCRIPT_URL && CONFIG.PROPERTY_SCRIPT_URL !== 'YOUR_PROPERTY_SCRIPT_URL_HERE') {
+                    const response = await fetch(CONFIG.PROPERTY_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(propertyData)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.result === 'success') {
+                        successMessage.style.display = 'block';
+                        this.reset();
+                        successMessage.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        throw new Error(result.message || 'Failed to add property');
+                    }
+                } else {
+                    throw new Error('Property script URL not configured');
+                }
+
+            } catch (error) {
+                console.error('Add property error:', error);
+                errorMessage.style.display = 'block';
+                errorMessage.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                errorMessage.scrollIntoView({ behavior: 'smooth' });
+            } finally {
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        // Load properties function
+        async function loadProperties() {
+            const loading = document.getElementById('viewLoading');
+            const successMessage = document.getElementById('viewSuccessMessage');
+            const errorMessage = document.getElementById('viewErrorMessage');
+            const propertyList = document.getElementById('propertyList');
+            
+            loading.style.display = 'block';
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            try {
+                if (!CONFIG.PROPERTY_SCRIPT_URL || CONFIG.PROPERTY_SCRIPT_URL === 'YOUR_PROPERTY_SCRIPT_URL_HERE') {
+                    throw new Error('Property script URL not configured');
+                }
+
+                const response = await fetch(CONFIG.PROPERTY_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action: 'getProperties' })
+                });
+
+                const result = await response.json();
+                
+                if (result.result === 'success' && result.properties) {
+                    displayProperties(result.properties);
+                    successMessage.style.display = 'block';
+                } else {
+                    throw new Error(result.message || 'Failed to load properties');
+                }
+
+            } catch (error) {
+                console.error('Load properties error:', error);
+                errorMessage.style.display = 'block';
+                errorMessage.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                propertyList.innerHTML = '<p>Could not load properties. Please check your configuration.</p>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Display properties function
+        function displayProperties(properties) {
+            const propertyList = document.getElementById('propertyList');
+            
+            if (!properties || properties.length === 0) {
+                propertyList.innerHTML = '<p>No properties found. Add some properties using the form above.</p>';
+                return;
+            }
+
+            let html = `<h3>📋 Your Properties (${properties.length} total)</h3>`;
+            
+            properties.forEach(property => {
+                html += `
+                    <div class="property-item">
+                        <h4>${property.fullAddress}</h4>
+                        <div class="property-details">
+                            <strong>Type:</strong> ${property.propertyDescription}<br>
+                            <strong>Price:</strong> ${property.priceRange || 'Not specified'}<br>
+                            <strong>Open Times:</strong> ${property.openHomeTimes}<br>
+                            ${property.features ? `<strong>Features:</strong> ${property.features}<br>` : ''}
+                            ${property.description ? `<strong>Notes:</strong> ${property.description}<br>` : ''}
+                            <strong>Added:</strong> ${property.dateAdded}
+                        </div>
+                    </div>
+                `;
+            });
+
+            propertyList.innerHTML = html;
+        }
+
+        // Load properties on page load when viewing that tab
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load properties if view tab becomes active
+            const viewTab = document.querySelector('[onclick="switchTab(\'view-properties\')"]');
+            viewTab.addEventListener('click', function() {
+                setTimeout(() => {
+                    if (document.getElementById('view-properties').classList.contains('active')) {
+                        loadProperties();
+                    }
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>
